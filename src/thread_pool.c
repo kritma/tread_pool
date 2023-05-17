@@ -1,4 +1,5 @@
 #include "thread_pool.h"
+#include <stdlib.h>
 
 typedef struct {
   void (*callback)(void *);
