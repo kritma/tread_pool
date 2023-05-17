@@ -1,5 +1,6 @@
 #include "../src/thread_pool.h"
 #include <math.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
@@ -34,12 +35,11 @@ int main() {
   threadpool_clean(pool, 1);
 
   long long end = time_ms();
-  printf("time: %lldms\n", end - start);
+  printf("time: %lldms pool\n", end - start);
 
   start = time_ms();
 
   for (int i = 0; i < sums_length; i++) {
-    sums[i] = i + 1;
     float sum = 0;
     for (int j = 0; j < N_MAX; j++) {
       sum += 1.0F / powf(i, j);
@@ -48,8 +48,23 @@ int main() {
   }
 
   end = time_ms();
-  printf("time: %lldms\n", end - start);
+  printf("time: %lldms single thread\n", end - start);
+
+  start = time_ms();
+
+  pthread_t *threads = malloc(sizeof(pthread_t) * sums_length);
+  for (int i = 0; i < sums_length; i++) {
+    sums[i] = i + 1;
+    pthread_create(threads + i, NULL, calc_sum, sums + i);
+  }
+  for (int i = 0; i < sums_length; i++) {
+    pthread_join(threads[i], NULL);
+  }
+
+  end = time_ms();
+  printf("time: %lldms threads\n", end - start);
   // Intel(R) Core(TM) i7-7700HQ (8) @ 3.8 GHz
-  //  time: 23ms
-  //  time: 77ms
+  // time: 22ms pool
+  // time: 75ms single thread
+  // time: 51ms threads
 }
