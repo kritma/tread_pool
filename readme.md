@@ -19,6 +19,6 @@ int main() {
     *val = i;
     threadpool_run(pool, print_val, val);
   }
-  threadpool_clean(pool, 1);
+  threadpool_destroy(pool, 1);
 }
 ```
